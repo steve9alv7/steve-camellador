@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Steve' camellador 😼</title>
+<link id="favicon" rel="icon" href="">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700&display=swap');
+
+body{font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#39ff14;text-align:center}
+.container{background:#111;padding:25px;border-radius:12px;box-shadow:0 0 25px rgba(57,255,20,.6);max-width:350px}
+input{padding:10px;border-radius:8px;border:none;margin-bottom:15px;width:200px;background:#000;color:#fff}
+button{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-weight:bold;margin:5px;color:#000}
+#startBtn{background:#00ff99}
+#resetBtn{display:none}
+#panicBtn{display:none;color:#fff}
+#nameDisplay{font-size:18px;margin-bottom:10px}
+#timer{font-size:30px;margin-top:10px}
+#remaining{font-size:16px;margin-top:5px}
+#pay{margin-top:15px;font-size:16px;font-family:'Nunito',sans-serif;font-weight:bold;color:#d4a017}
+img{margin-top:15px;width:100%;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Steve' camellador 😼</h2>
+<div id="nameDisplay"></div>
+<input type="text" id="n" placeholder="Tu nombre">
+<br>
+<button id="startBtn" onclick="s()">Iniciar</button>
+<button id="resetBtn" onclick="r()">ya revisé</button>
+<button id="panicBtn" onclick="panicReset()">Ya, ya revisé!! 🤬</button>
+<div id="timer"></div>
+<div id="remaining"></div>
+<div id="pay"></div>
+<img src="https://i.ebayimg.com/images/g/ESkAAOSwlodkSpxH/s-l1200.png" alt="Do it for her">
+</div>
+<script>
+let t=null,i=null,alarmPlayed=false,flash=false,yellowPlayed=false,panicMode=false,hideButtons=false;
+
+const holidays=['01-01','01-12','03-23','04-02','04-03','05-01','05-18','06-08','06-15','06-29','07-20','08-07','08-17','10-12','11-02','11-16','12-08','12-25'];
+
+function isHoliday(d){let m=(d.getMonth()+1).toString().padStart(2,'0');let day=d.getDate().toString().padStart(2,'0');return holidays.includes(`${m}-${day}`)}
+
+function adjustPayDate(date){while(date.getDay()===0||date.getDay()===6||isHoliday(date)){date.setDate(date.getDate()-1)}return date}
+
+function getNextPay(){let now=new Date();let candidates=[5,20].map(d=>adjustPayDate(new Date(now.getFullYear(),now.getMonth(),d)));
+let future=candidates.filter(d=>d>=now);
+if(future.length===0){let nextMonth=new Date(now.getFullYear(),now.getMonth()+1,5);future=[adjustPayDate(nextMonth)]}
+return future.sort((a,b)=>a-b)[0]}
+
+function payLogic(){let now=new Date();let payDate=getNextPay();
+let diff=Math.ceil((payDate-now)/(1000*60*60*24));
+if(diff<=0){
+ document.getElementById('pay').innerText=now.getHours()<14?'Es hoy, es hoy... 🤓 Hoy pagan parce!! 👺':'Hoy se bebe, hoy se gasta!! 😎💵';
+}else{
+ document.getElementById('pay').innerText='Faltan '+diff+' días para que paguen 👺 échale ganas!! 🤠';
+}}
+
+function f(c){let a=document.createElement('canvas');a.width=64;a.height=64;let x=a.getContext('2d');x.fillStyle=c;x.shadowColor=c;x.shadowBlur=20;x.fillRect(0,0,64,64);return a.toDataURL('image/png')}
+
+function engine(){let ctx=new (window.AudioContext||window.webkitAudioContext)();let o=ctx.createOscillator();let g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+o.type='sawtooth';o.frequency.setValueAtTime(80,ctx.currentTime);
+o.frequency.exponentialRampToValueAtTime(300,ctx.currentTime+0.6);
+g.gain.setValueAtTime(0.3,ctx.currentTime);
+o.start();setTimeout(()=>o.stop(),700)}
+
+function beep(freq,dur){let ctx=new (window.AudioContext||window.webkitAudioContext)();let o=ctx.createOscillator();let g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+o.frequency.value=freq;g.gain.setValueAtTime(0.2,ctx.currentTime);
+o.start();setTimeout(()=>o.stop(),dur)}
+
+function yellowSound(){if(!yellowPlayed){beep(700,120);setTimeout(()=>beep(700,120),180);yellowPlayed=true}}
+function redAlarm(){for(let k=0;k<4;k++){setTimeout(()=>beep(900,180),k*350)}}
+
+function updateColors(min){let btn=document.getElementById('resetBtn');
+if(min<10){btn.style.background='#00ff00';btn.innerText='Ya revisé! 🤙🏽'}
+else if(min<20){btn.style.background='#ffff00';btn.innerText='Ya revisé!!🙄'}
+else{btn.style.background='#ff0033';btn.innerText='ya revisé'}}
+
+function u(m){let c='#00ff00';
+if(m>=10&&m<=19){c='#ffff00';yellowSound()}
+else if(m>=20){c=flash?'#ff0033':'#00ccff';flash=!flash;if(!alarmPlayed){redAlarm();alarmPlayed=true;activatePanic()}}
+document.getElementById('favicon').href=f(c);
+document.title='('+m+' min) Steve\' camellador 😼';
+updateColors(m)}
+
+function activatePanic(){panicMode=true;
+document.getElementById('startBtn').style.display='none';
+let p=document.getElementById('panicBtn');
+p.style.display='inline-block';
+setInterval(()=>{
+p.style.background=flash?'#ff0033':'#00ccff';
+flash=!flash;
+},400);
+}
+
+function panicReset(){panicMode=false;
+t=Date.now();alarmPlayed=false;yellowPlayed=false;flash=false;
+document.getElementById('panicBtn').style.display='none';
+document.getElementById('startBtn').style.display='inline-block';}
+
+function updateUI(){let e=Math.floor((Date.now()-t)/1000);
+let min=Math.floor(e/60);
+let sec=e%60;
+
+document.getElementById('timer').innerText=`${min}:${sec.toString().padStart(2,'0')}`;
+
+let remaining=20-min;
+if(remaining>0){
+ document.getElementById('remaining').innerText=`Parce, eche ojo en ${remaining} minutos ⏲️`;
+}else{
+ document.getElementById('remaining').innerText='En rojo';
+}
+
+let resetBtn=document.getElementById('resetBtn');
+let startBtn=document.getElementById('startBtn');
+
+if(hideButtons){resetBtn.style.display='none';startBtn.style.display='none'}
+else if(min<10 && !panicMode){
+ resetBtn.style.display='inline-block';
+ startBtn.style.display='none';
+}
+else if(min>=10 && min<20 && !panicMode){
+ resetBtn.style.display='inline-block';
+ startBtn.style.display='none';
+}
+else if(e>9 && remaining>1 && !panicMode){
+ resetBtn.style.display='inline-block';
+}
+else{
+ resetBtn.style.display='none';
+}
+
+u(min);
+payLogic();}
+
+function s(){let n=document.getElementById('n').value;if(!n){alert('Ingresa tu nombre');return}
+t=Date.now();alarmPlayed=false;yellowPlayed=false;engine();
+
+hideButtons=true;
+setTimeout(()=>hideButtons=false,7000);
+
+document.getElementById('nameDisplay').innerHTML='🦦 Chambeando: <span style="color:#f1c40f">'+n+'</span>';
+document.getElementById('n').style.display='none';
+clearInterval(i);
+i=setInterval(updateUI,1000)}
+
+function r(){t=Date.now();alarmPlayed=false;yellowPlayed=false}
+
+</script>
+</body>
+</html>
