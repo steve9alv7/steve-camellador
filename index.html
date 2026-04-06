@@ -59,11 +59,21 @@ if(diff<=0){
 
 function f(c){let a=document.createElement('canvas');a.width=64;a.height=64;let x=a.getContext('2d');x.fillStyle=c;x.shadowColor=c;x.shadowBlur=20;x.fillRect(0,0,64,64);return a.toDataURL('image/png')}
 
-function engine(){let ctx=new (window.AudioContext||window.webkitAudioContext)();let o=ctx.createOscillator();let g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
-o.type='sawtooth';o.frequency.setValueAtTime(80,ctx.currentTime);
-o.frequency.exponentialRampToValueAtTime(300,ctx.currentTime+0.6);
-g.gain.setValueAtTime(0.3,ctx.currentTime);
-o.start();setTimeout(()=>o.stop(),700)}
+function engine(){
+  try{
+    let ctx=new (window.AudioContext||window.webkitAudioContext)();
+    let o=ctx.createOscillator();
+    let g=ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.type='sawtooth';
+    o.frequency.setValueAtTime(80,ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(300,ctx.currentTime+0.6);
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    o.start();
+    setTimeout(()=>o.stop(),700);
+  }catch(e){}
+}
 
 function beep(freq,dur){let ctx=new (window.AudioContext||window.webkitAudioContext)();let o=ctx.createOscillator();let g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
 o.frequency.value=freq;g.gain.setValueAtTime(0.2,ctx.currentTime);
